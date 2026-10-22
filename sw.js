@@ -1,5 +1,5 @@
 // 離線快取：第一次打開時把整個 App 存在手機上，之後沒網路也能開
-const CACHE = "wordbook-202610221848";
+const CACHE = "wordbook-202610221921";
 const FILES = ["./", "index.html", "dict.json", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 // cache: "reload" 跳過瀏覽器快取，確保存到的是剛上傳的新檔案
 self.addEventListener("install", e => {

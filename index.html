@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
+<meta name="wordbook-version" content="202610221848">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="單字庫">
@@ -94,7 +95,14 @@ button { font: inherit; cursor: pointer; }
 /* iPhone 在輸入框字小於 16px 時會自動放大頁面，之後就得左右滑動 */
 input, textarea, select { font-size: max(16px, 1em) !important; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-body { overflow-x: clip; }
+html, body { max-width: 100%; overflow-x: hidden; }
+/* 單欄 grid 一律用 minmax(0,1fr)，避免任何內容把欄寬撐超過螢幕（Safari 特別容易） */
+.wrap, .list, .card, .quiz, .sync, .family, .bar, .miss, .syncstep { grid-template-columns: minmax(0, 1fr); }
+.wrap > *, .bar > *, .list > * { min-width: 0; max-width: 100%; }
+.add, .tools, .qform, .headtools, .qrow, .qtop { min-width: 0; max-width: 100%; }
+.add input, .qform input { width: 0; }
+.tools input { flex: 1 1 120px; min-width: 0; width: 0; }
+.appver { color: var(--muted); font: .72rem var(--mono); text-align: center; margin: 8px 0 0; }
 .say:hover { color: var(--accent); }
 .say:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .say svg { width: .55em; height: .55em; color: var(--muted); flex: none; }
@@ -226,6 +234,7 @@ body { overflow-x: clip; }
     <p class="note" id="status">正在連線到你的單字庫…</p>
   </div>
 
+  <p class="appver" id="appver" hidden></p>
   <div class="list" id="list">
     <div class="empty"><b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。</div>
   </div>
@@ -655,6 +664,8 @@ $("#importBtn").addEventListener("click", async () => {
 /* ---------- 啟動 ---------- */
 (async () => {
   if (OFFLINE) {
+    const ver = document.querySelector('meta[name="wordbook-version"]');
+    if (ver) { $("#appver").textContent = "離線版 版本 " + ver.content; $("#appver").hidden = false; }
     startLocal("離線版：單字存在這支手機上，不需要網路。要和雲端版互通請按「同步」。");
     $("#status").classList.remove("warn");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

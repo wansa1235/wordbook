@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
-<meta name="wordbook-version" content="202610221925">
+<meta name="wordbook-version" content="202610221929">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vocabulary">
@@ -179,7 +179,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
 .add, .tools, .qform, .headtools, .qrow, .qtop { min-width: 0; max-width: 100%; }
 .add input, .qform input { width: 0; }
 .tools input { flex: 1 1 120px; min-width: 0; width: 0; }
-.appver { color: var(--muted); font: .64rem var(--mono); letter-spacing: .08em; text-transform: uppercase; text-align: left; margin: 0; }
+.appver { color: var(--muted); font: .64rem var(--mono); letter-spacing: .08em; text-transform: uppercase; text-align: left; margin: -16px 0 -8px; }
 
 @media (max-width: 520px) {
   .wrap { padding-block: 28px 64px; gap: 22px; }
@@ -436,7 +436,7 @@ function jumpTo(id) {
 }
 
 /* ---------- 畫面 ---------- */
-function setStatus(t, warn) { const s = $("#status"); s.textContent = t; s.classList.toggle("warn", !!warn); }
+function setStatus(t, warn) { const s = $("#status"); s.textContent = t; s.hidden = !t; s.classList.toggle("warn", !!warn); }
 function posClass(p) { p = (p || "").toLowerCase(); return p.startsWith("n") ? "n" : p.startsWith("v") ? "v" : p.startsWith("adj") ? "adj" : p.startsWith("adv") ? "adv" : ""; }
 function el(tag, props = {}, ...kids) {
   const e = document.createElement(tag);

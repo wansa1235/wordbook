@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
-<meta name="wordbook-version" content="202610230134">
+<meta name="wordbook-version" content="202610230159">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vocabulary">
@@ -57,7 +57,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .wrap { max-width: 720px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); padding-block: 44px 88px; display: grid; gap: 28px; }
 
 /* 刊頭 */
-header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-bottom: 14px; border-bottom: 1.5px solid var(--ink); }
+/* 刊頭：左邊刊名、右邊 Quiz，兩者底部對齊在同一條粗線上 */
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1.5px solid var(--ink); }
+header .headtools { padding-bottom: 4px; }
 h1 { font-family: var(--serif); font-weight: 400; font-size: 2.75rem; line-height: 1; margin: 0; letter-spacing: -0.025em; font-optical-sizing: auto; }
 .stats { font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
 .headtools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -68,8 +70,6 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .btn:hover { background: var(--accent); border-color: var(--accent); }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.small { padding: 7px 14px; font-size: .82rem; }
-#quizBtn { background: transparent; color: var(--ink); }
-#quizBtn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .ghost { background: none; border: 0; color: var(--muted); padding: 2px 0; font-size: .8rem; letter-spacing: .01em; text-underline-offset: 4px; }
 .ghost:hover { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; }
 .ghost.del:hover, .ghost.danger { color: var(--bad); }
@@ -133,6 +133,19 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .tools .ghost { font-size: .85rem; }
 .tools { justify-content: space-between; }
 .toolr { display: flex; align-items: center; gap: 18px; }
+/* 篩選：一個按鈕，點開才看到全部／學習中／已熟記 */
+.fmenu { position: relative; }
+.ftoggle { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; border-bottom: 1px solid var(--ink); padding: 4px 0; font-size: .85rem; color: var(--ink); }
+.ftoggle svg { width: 11px; height: 11px; transition: transform .2s; }
+.ftoggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.fpop { position: absolute; top: calc(100% + 8px); left: 0; z-index: 20; min-width: 160px; display: grid; padding: 4px 0; background: var(--sheet); border: 1px solid var(--rule); box-shadow: 0 16px 32px -20px rgba(20, 20, 30, .45); }
+.fpop button { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 10px 14px; background: none; border: 0; text-align: left; font-size: .88rem; color: var(--ink-2); }
+.fpop button:hover { background: var(--paper); color: var(--ink); }
+.fpop button[aria-pressed="true"] { color: var(--ink); font-weight: 500; }
+.fpop button[aria-pressed="true"] > span:first-child::before { content: "✓"; display: inline-block; width: 1.1em; margin-left: -1.1em; color: var(--accent); }
+.fpop button > span:first-child { padding-left: 1.1em; }
+.fnum { font-family: var(--mono); font-size: .68rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: -1px; }
+.fcount { font-family: var(--mono); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .acc { font-family: var(--mono); font-size: .74rem !important; letter-spacing: .06em; }
 .acc span { color: var(--muted); }
 .acc span.on { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
@@ -148,6 +161,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .list { display: grid; gap: 0; border-bottom: 1px solid var(--rule); }
 .card { border-top: 1px solid var(--rule); padding: 26px 0 24px; display: grid; gap: 10px; min-width: 0; }
 .card.mastered { opacity: .45; }
+.only-mastered .card.mastered, .only-mastered .azrow.mastered { opacity: 1; }
 .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 .headword { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; min-width: 0; }
 .say { background: none; border: 0; padding: 0; color: var(--ink); font-family: var(--serif); font-size: 2.1rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.015em; text-align: left; display: inline-flex; align-items: center; gap: 9px; border-radius: 0; }
@@ -188,9 +202,9 @@ button { font: inherit; cursor: pointer; color: inherit; }
 
 /* 測驗 */
 .quiz { display: grid; gap: 28px; }
-.qtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.qtop { display: flex; align-items: center; gap: 14px; }
 .qprog { font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 14px; }
-.track { width: 140px; height: 1px; background: var(--rule); overflow: hidden; }
+.track { width: 72px; height: 1px; background: var(--rule); overflow: hidden; }
 .track i { display: block; height: 100%; background: var(--ink); transition: width .25s; }
 .qword { display: grid; gap: 10px; justify-items: start; padding-block: 18px 4px; }
 .qword .say { font-size: 3.4rem; font-weight: 400; letter-spacing: -0.03em; }
@@ -205,7 +219,7 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .verdict p { margin: 0; color: var(--ink); font-size: 1.05rem; }
 .verdict small { color: var(--muted); }
 .qrow { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; }
-#quiz:not([hidden]) ~ .appver { display: none; }
+.quizzing .appver { display: none; }
 #qBody { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
 .opts { display: grid; gap: 8px; }
 .opt { display: flex; align-items: baseline; gap: 14px; width: 100%; min-width: 0; text-align: left; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 2px; background: var(--sheet); color: var(--ink); font-size: 1rem; line-height: 1.5; transition: border-color .15s, color .15s; }
@@ -265,22 +279,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
 <div class="wrap">
   <header>
     <h1>Vocabulary</h1>
-    <div class="headtools">
-      <div class="stats" id="stats"></div>
-      <button class="btn small" id="quizBtn" type="button" hidden>Quiz</button>
-    </div>
   </header>
-
-  <section class="quiz" id="quiz" hidden aria-live="polite">
-    <div class="qtop">
-      <div class="qprog" id="qProg"></div>
-      <div class="qrow">
-        <button class="sndbtn" id="autoSay" type="button" aria-pressed="true" aria-label="出題時播放聲音" title="出題時播放聲音"></button>
-        <button class="ghost" id="qExit" type="button">結束測驗</button>
-      </div>
-    </div>
-    <div id="qBody"></div>
-  </section>
 
   <div class="bar">
     <form class="add" id="addForm" autocomplete="off">
@@ -289,10 +288,16 @@ html, body { max-width: 100%; overflow-x: hidden; }
     </form>
     <div class="suggest" id="suggest" role="listbox" aria-label="建議的單字" hidden></div>
     <div class="tools">
-      <div class="seg" role="group" aria-label="篩選">
-        <button type="button" data-f="all" aria-pressed="true">全部</button>
-        <button type="button" data-f="learning" aria-pressed="false">學習中</button>
-        <button type="button" data-f="mastered" aria-pressed="false">已熟記</button>
+      <div class="fmenu" id="fmenu">
+        <button class="ftoggle" id="fToggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="fPop" aria-label="篩選單字">
+          <span id="fLabel">全部</span><span class="fnum" id="fNum" hidden></span>
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="fpop" id="fPop" role="menu" hidden>
+          <button type="button" role="menuitemradio" data-f="all" aria-pressed="true"><span>全部</span><span class="fcount" data-count="all"></span></button>
+          <button type="button" role="menuitemradio" data-f="learning" aria-pressed="false"><span>學習中</span><span class="fcount" data-count="learning"></span></button>
+          <button type="button" role="menuitemradio" data-f="mastered" aria-pressed="false"><span>已熟記</span><span class="fcount" data-count="mastered"></span></button>
+        </div>
       </div>
       <div class="toolr">
         <button class="ghost acc" id="accentBtn" type="button" title="切換美式／英式發音" aria-label="發音口音"><span data-acc="en-US">US</span> / <span data-acc="en-GB">UK</span></button>
@@ -321,13 +326,21 @@ html, body { max-width: 100%; overflow-x: hidden; }
     <div class="seg" role="group" aria-label="檢視方式">
       <button type="button" data-view="cards" aria-pressed="true">Cards</button>
       <button type="button" data-view="az" aria-pressed="false">A–Z</button>
+      <button type="button" id="quizTab" aria-pressed="false" hidden>Quiz</button>
     </div>
     <div class="deckctl" id="deckctl">
       <button type="button" id="prevCard" aria-label="上一張">←</button>
       <span id="deckCount"></span>
       <button type="button" id="nextCard" aria-label="下一張">→</button>
     </div>
+    <div class="qtop" id="qTop" hidden>
+      <div class="qprog" id="qProg"></div>
+      <button class="sndbtn" id="autoSay" type="button" aria-pressed="true" aria-label="出題時播放聲音" title="出題時播放聲音"></button>
+    </div>
   </div>
+  <section class="quiz" id="quiz" hidden aria-live="polite">
+    <div id="qBody"></div>
+  </section>
   <div class="list" id="list">
     <div class="empty"><b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。</div>
   </div>
@@ -599,15 +612,19 @@ function render() {
     (state.filter === "all" || (state.filter === "mastered") === !!w.mastered) &&
     (!q || [w.word, w.display, w.zh, ...(w.family || []).flatMap(f => [f.word, f.zh])].some(s => (s || "").toLowerCase().includes(q))));
   const m = state.words.filter(w => w.mastered).length;
-  $("#stats").textContent = state.words.length ? `${state.words.length} ${state.words.length === 1 ? "word" : "words"} · ${m} mastered` : "";
+  const counts = { all: state.words.length, learning: state.words.length - m, mastered: m };
+  document.querySelectorAll("[data-count]").forEach(s => { s.textContent = counts[s.dataset.count]; });
+  // 選「已熟記」時，按鈕旁小小顯示熟記了幾個字
+  $("#fNum").textContent = m; $("#fNum").hidden = state.filter !== "mastered";
   const pool = quizPool();
-  $("#quizBtn").hidden = !pool.length || quiz.active;
-  $("#quizBtn").textContent = `Quiz (${pool.length})`;
+  $("#quizTab").hidden = !pool.length && !quiz.active;
+  $("#quizTab").setAttribute("aria-pressed", String(quiz.active));
   list.replaceChildren();
-  $("#views").hidden = !state.words.length || quiz.active;
-  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
-  $("#deckctl").hidden = state.view !== "cards" || !shown.length;
-  list.className = "list " + (state.view === "cards" ? "deckmode" : "azmode");
+  $("#views").hidden = !state.words.length;
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(!quiz.active && b.dataset.view === state.view)));
+  $("#deckctl").hidden = quiz.active || state.view !== "cards" || !shown.length;
+  $("#qTop").hidden = !quiz.active;
+  list.className = "list " + (state.view === "cards" ? "deckmode" : "azmode") + (state.filter === "mastered" ? " only-mastered" : "");
   if (!state.words.length) {
     list.append(el("div", { class: "empty", html: "<b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。" }));
   } else if (!shown.length) {
@@ -630,9 +647,9 @@ function renderDeck(list, shown) {
   list.append(stage);
   if (state.enterDir && !reduceMotion()) {
     const d = state.enterDir;
-    c.style.transform = `translateX(${d * 28}%)`; c.style.opacity = "0";
+    c.style.transform = `translateX(${d * 12}%)`; c.style.opacity = "0";
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      c.style.transition = "transform .22s cubic-bezier(.2,.7,.3,1), opacity .22s"; c.style.transform = ""; c.style.opacity = "";
+      c.style.transition = "transform .38s cubic-bezier(.2,.8,.3,1), opacity .36s ease-in-out"; c.style.transform = ""; c.style.opacity = "";
     }));
   }
   state.enterDir = 0;
@@ -651,36 +668,48 @@ function go(dir) {
   }
   state.confirmDel = null; state.editing = null;
   if (reduceMotion()) { state.idx = next; render(); return; }
-  c.style.transition = "transform .18s ease-in, opacity .18s"; c.style.transform = `translateX(${-dir * 110}%) rotate(${-dir * 4}deg)`; c.style.opacity = "0";
-  setTimeout(() => { state.idx = next; state.enterDir = dir; render(); }, 170);
+  // 從手指放開的位置接著飛出去，不會先跳回中間
+  // 移動距離縮短、時間拉長，讓卡片是「淡出」離開而不是被甩出去
+  c.style.transition = "transform .34s cubic-bezier(.25,.6,.35,1), opacity .3s ease-out"; c.style.transform = `translateX(${-dir * 55}%) rotate(${-dir * 3}deg)`; c.style.opacity = "0";
+  setTimeout(() => { state.idx = next; state.enterDir = dir; render(); }, 260);
 }
 function attachSwipe(stage, c) {
-  let d = null;
+  let d = null, raf = 0;
+  const paint = () => { raf = 0; if (d) c.style.transform = `translateX(${d.dx}px) rotate(${d.dx / 45}deg)`; };
   stage.addEventListener("pointerdown", e => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     if (e.target.closest("input, textarea")) return;
-    d = { x: e.clientX, y: e.clientY, dx: 0, active: false, id: e.pointerId };
+    const t = performance.now();
+    d = { x: e.clientX, y: e.clientY, dx: 0, active: false, id: e.pointerId, lastX: e.clientX, lastT: t, vx: 0 };
   });
   stage.addEventListener("pointermove", e => {
     if (!d) return;
     d.dx = e.clientX - d.x; const dy = e.clientY - d.y;
     if (!d.active) {
-      if (Math.abs(d.dx) > 10 && Math.abs(d.dx) > Math.abs(dy) * 1.3) { d.active = true; stage.classList.add("dragging"); try { stage.setPointerCapture(d.id); } catch {} }
-      else if (Math.abs(dy) > 12) { d = null; return; }
+      // 稍微往橫向動一點就開始跟手；明顯往上下才當成捲動頁面
+      if (Math.abs(d.dx) > 6 && Math.abs(d.dx) > Math.abs(dy)) { d.active = true; stage.classList.add("dragging"); c.style.transition = "none"; try { stage.setPointerCapture(d.id); } catch {} }
+      else if (Math.abs(dy) > 10) { d = null; return; }
     }
-    if (d.active) { c.style.transition = "none"; c.style.transform = `translateX(${d.dx}px) rotate(${d.dx / 40}deg)`; }
+    if (d.active) {
+      const t = performance.now(), dt = Math.max(1, t - d.lastT);
+      d.vx = 0.7 * ((e.clientX - d.lastX) / dt) + 0.3 * d.vx;  // 平滑後的速度（px/ms）
+      d.lastX = e.clientX; d.lastT = t;
+      if (!raf) raf = requestAnimationFrame(paint);
+    }
   });
   const end = () => {
     if (!d) return;
-    const { active, dx } = d; d = null; stage.classList.remove("dragging");
+    const { active, dx, vx } = d; d = null; stage.classList.remove("dragging");
     if (!active) return;
     // 剛拖完不要觸發卡片上的按鈕
     const block = ev => { ev.stopPropagation(); ev.preventDefault(); };
     stage.addEventListener("click", block, true);
     setTimeout(() => stage.removeEventListener("click", block, true), 60);
-    if (dx < -70) go(1);
-    else if (dx > 70) go(-1);
-    else { c.style.transition = "transform .2s"; c.style.transform = ""; }
+    // 滑過卡片寬度的 15%（最多 50px），或輕輕一撥（夠快）就換卡
+    const far = Math.min(50, stage.offsetWidth * 0.15), flick = Math.abs(vx) > 0.35 && Math.abs(dx) > 12;
+    const dir = (dx < -far || (flick && vx < 0)) ? 1 : (dx > far || (flick && vx > 0)) ? -1 : 0;
+    if (dir) go(dir);
+    else { c.style.transition = "transform .22s cubic-bezier(.2,.8,.3,1)"; c.style.transform = ""; }
   };
   stage.addEventListener("pointerup", end);
   stage.addEventListener("pointercancel", end);
@@ -721,7 +750,10 @@ function renderAZ(list, shown) {
   }
 }
 function saveView() { try { localStorage.setItem("view", state.view); } catch {} }
-document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { state.view = b.dataset.view; saveView(); render(); }));
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+  state.view = b.dataset.view; saveView();
+  if (quiz.active) exitQuiz(); else render();  // 測驗中點 Cards／A–Z 就是離開測驗
+}));
 $("#prevCard").addEventListener("click", () => go(-1));
 $("#nextCard").addEventListener("click", () => go(1));
 document.addEventListener("keydown", e => {
@@ -731,6 +763,7 @@ document.addEventListener("keydown", e => {
 });
 function syncSeg() {
   document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)));
+  $("#fLabel").textContent = { all: "全部", learning: "學習中", mastered: "已熟記" }[state.filter];
   document.querySelectorAll("#accentBtn [data-acc]").forEach(s => s.classList.toggle("on", s.dataset.acc === state.accent));
 }
 
@@ -751,12 +784,12 @@ function senses(zh) { return zh.split(/[；;，,、\/／()（）\[\]［］]/).ma
 function startQuiz(words) {
   quiz.items = shuffle(words.map(w => w.id)); quiz.i = 0; quiz.results = []; quiz.active = true;
   speechSynthesis && speechSynthesis.cancel && speechSynthesis.cancel();
-  $(".bar").hidden = true; $("#list").hidden = true; $("#quiz").hidden = false;
+  $(".bar").hidden = true; $("#list").hidden = true; $("#quiz").hidden = false; document.body.classList.add("quizzing");
   render(); askNext();
   window.scrollTo(0, 0);
 }
 function exitQuiz() {
-  quiz.active = false; $(".bar").hidden = false; $("#list").hidden = false; $("#quiz").hidden = true; render();
+  quiz.active = false; $(".bar").hidden = false; $("#list").hidden = false; $("#quiz").hidden = true; document.body.classList.remove("quizzing"); render();
 }
 const wordById = id => state.words.find(w => w.id === id);
 /* 選擇題：正確答案＋3 個干擾選項（先從單字庫挑，不夠再從內建字典補，盡量同詞性） */
@@ -861,8 +894,7 @@ function renderQuiz() {
   body.append(row);
   nextBtn.focus();
 }
-$("#quizBtn").addEventListener("click", () => startQuiz(quizPool()));
-$("#qExit").addEventListener("click", exitQuiz);
+$("#quizTab").addEventListener("click", () => { if (!quiz.active && quizPool().length) startQuiz(quizPool()); });
 $("#autoSay").addEventListener("click", () => {
   quiz.autoSay = !quiz.autoSay; syncSound();
   try { localStorage.setItem("autoSay", quiz.autoSay ? "1" : "0"); } catch {}
@@ -919,7 +951,14 @@ $("#newWord").addEventListener("input", e => {
   }));
   box.hidden = false; e.target.setAttribute("aria-expanded", "true");
 });
-document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.f; syncSeg(); render(); }));
+document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.f; state.idx = 0; syncSeg(); render(); closeFilter(); $("#fToggle").focus(); }));
+function closeFilter() { $("#fPop").hidden = true; $("#fToggle").setAttribute("aria-expanded", "false"); }
+$("#fToggle").addEventListener("click", () => {
+  const open = $("#fPop").hidden; $("#fPop").hidden = !open; $("#fToggle").setAttribute("aria-expanded", String(open));
+  if (open) $("#fPop").querySelector('[aria-pressed="true"]').focus();
+});
+document.addEventListener("pointerdown", e => { if (!$("#fPop").hidden && !e.target.closest("#fmenu")) closeFilter(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#fPop").hidden) { closeFilter(); $("#fToggle").focus(); } });
 $("#accentBtn").addEventListener("click", () => {
   state.accent = state.accent === "en-US" ? "en-GB" : "en-US"; syncSeg(); try { localStorage.setItem("accent", state.accent); } catch {}
 });

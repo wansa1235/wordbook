@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
-<meta name="wordbook-version" content="202610221921">
+<meta name="wordbook-version" content="202610221925">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vocabulary">
@@ -683,7 +683,7 @@ $("#importBtn").addEventListener("click", async () => {
   if (OFFLINE) {
     const ver = document.querySelector('meta[name="wordbook-version"]');
     if (ver) { $("#appver").textContent = "離線版 版本 " + ver.content; $("#appver").hidden = false; }
-    startLocal("離線版：單字存在這支手機上，不需要網路。要和雲端版互通請按「同步」。");
+    startLocal("");
     $("#status").classList.remove("warn");
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
     return;

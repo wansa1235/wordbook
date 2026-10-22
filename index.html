@@ -220,7 +220,7 @@ button { font: inherit; cursor: pointer; }
   </div>
 
   <div class="list" id="list">
-    <div class="empty"><b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。大考中心詞彙表裡的字會直接從內建字典帶出中文意思、音標和同字族單字，其他字才請 Claude 查詢。點任何一個英文字就能聽發音。</div>
+    <div class="empty"><b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。</div>
   </div>
 </div>
 
@@ -358,7 +358,11 @@ let dict = null;
 const dictReady = fetch("dict.json").then(r => r.ok ? r.json() : null).then(d => { dict = d; return d; }).catch(() => null);
 function fromDict(word) {
   if (!dict) return null;
-  const lemma = dict.words[word] ? word : dict.inf[word];
+  let lemma = dict.words[word] ? word : dict.inf[word];
+  if (!lemma && word.includes(" ")) {  // gave up → give up
+    const [first, ...rest] = word.split(/\s+/), base = dict.inf[first] && [dict.inf[first], ...rest].join(" ");
+    if (base && dict.words[base]) lemma = base;
+  }
   const e = lemma && dict.words[lemma];
   if (!e) return null;
   return { lemma, data: {
@@ -486,7 +490,7 @@ function render() {
   $("#quizBtn").textContent = `開始測驗（${pool.length} 題）`;
   list.replaceChildren();
   if (!state.words.length) {
-    list.append(el("div", { class: "empty", html: "<b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。大考中心詞彙表裡的字會直接從內建字典帶出中文意思、音標和同字族單字，其他字才請 Claude 查詢。點任何一個英文字就能聽發音。" }));
+    list.append(el("div", { class: "empty", html: "<b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。" }));
   } else if (!shown.length) {
     list.append(el("div", { class: "empty" }, "沒有符合條件的單字。"));
   } else shown.forEach(w => list.append(card(w)));
@@ -606,8 +610,13 @@ $("#search").addEventListener("input", e => { state.q = e.target.value; render()
 $("#newWord").addEventListener("input", e => {
   const q = e.target.value.trim().toLowerCase(), dl = $("#dictWords");
   if (!dict || q.length < 2) { dl.replaceChildren(); return; }
-  const hits = [];
-  for (const k in dict.words) { if (k.startsWith(q) && dict.words[k].lv) { hits.push(k); if (hits.length >= 8) break; } }
+  // 大考詞彙優先，再補其他字
+  const hits = [], more = [];
+  for (const k in dict.words) {
+    if (!k.startsWith(q)) continue;
+    if (dict.words[k].lv) { hits.push(k); if (hits.length >= 8) break; } else if (more.length < 8) more.push(k);
+  }
+  hits.push(...more.slice(0, 8 - hits.length));
   dl.replaceChildren(...hits.map(k => el("option", { value: k }, dict.words[k].zh.slice(0, 20))));
 });
 document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.f; syncSeg(); render(); }));

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
-<meta name="wordbook-version" content="202610222259">
+<meta name="wordbook-version" content="202610230134">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vocabulary">
@@ -81,6 +81,41 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .add input { flex: 1; min-width: 0; font: 400 1.35rem var(--serif); padding: 10px 2px; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; background: transparent; color: var(--ink); transition: border-color .15s; }
 .add input::placeholder { font-family: var(--sans); font-size: 1rem; color: var(--muted); }
 .add input:focus { outline: none; border-bottom-color: var(--ink); }
+/* 檢視切換列 */
+.views { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin-bottom: -10px; }
+.deckctl { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.deckctl button { width: 34px; height: 34px; border: 1px solid var(--rule); border-radius: 2px; background: none; color: var(--ink); font-size: .95rem; line-height: 1; }
+.deckctl button:hover:not(:disabled) { border-color: var(--ink); }
+.deckctl button:disabled { opacity: .3; cursor: default; }
+
+/* 卡片模式：一張一張，後面疊兩層表示還有下一張 */
+.list.deckmode { border-bottom: 0; }
+.stage { position: relative; touch-action: pan-y; padding-bottom: 14px; }
+.stage.dragging { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+.stage.stacked::before, .stage.stacked::after { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 14px; border: 1px solid var(--rule); background: var(--sheet); }
+.stage.stacked::before { transform: translateY(7px) scale(.975); opacity: .8; }
+.stage.stacked::after { transform: translateY(14px) scale(.95); opacity: .5; z-index: -1; }
+.stage { isolation: isolate; }
+.stage .card { position: relative; z-index: 1; background: var(--sheet); border: 1px solid var(--rule); padding: 28px 24px 24px; min-height: 300px; align-content: start; box-shadow: 0 22px 40px -30px rgba(20, 20, 30, .45); will-change: transform; }
+.swipehint { margin: 6px 0 0; text-align: center; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; color: var(--muted); }
+@media (hover: hover) and (pointer: fine) { .swipehint { visibility: hidden; } }
+
+/* A–Z 單字表 */
+.list.azmode { border-bottom: 0; }
+.azbar { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
+.azbar button { background: none; border: 0; padding: 7px 0; font-family: var(--mono); font-size: .78rem; color: var(--ink); }
+.azbar button:hover:not(:disabled) { color: var(--accent); }
+.azbar button:disabled { color: var(--rule); cursor: default; }
+.azgroup { scroll-margin-top: 12px; }
+.azgroup h3 { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 2px; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-family: var(--serif); font-weight: 400; font-size: 1.7rem; line-height: 1; }
+.azgroup h3 small { font-family: var(--mono); font-size: .64rem; letter-spacing: .08em; color: var(--muted); }
+.azrow { display: grid; grid-template-columns: minmax(0, 11em) 4.5em minmax(0, 1fr); gap: 2px 14px; align-items: baseline; padding: 9px 0; border-bottom: 1px dotted var(--rule); cursor: pointer; }
+.azrow:hover { background: var(--sheet); }
+.azrow.mastered { opacity: .45; }
+.azrow .say { font-size: 1.1rem; font-weight: 400; letter-spacing: 0; }
+.azrow .pos { font-family: var(--serif); font-style: italic; font-size: .92rem; color: var(--muted); }
+.azrow .zh2 { font-size: .9rem; color: var(--ink-2); overflow-wrap: anywhere; }
+
 /* 建議字：放在輸入框下方、跟著版面往下推，不蓋住正在打的字 */
 .suggest { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: -8px; border-bottom: 1px solid var(--rule); }
 .suggest button { display: flex; align-items: baseline; gap: 14px; width: 100%; min-width: 0; text-align: left; background: none; border: 0; padding: 8px 2px; color: var(--ink); }
@@ -96,6 +131,12 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 .tools .ghost { font-size: .85rem; }
+.tools { justify-content: space-between; }
+.toolr { display: flex; align-items: center; gap: 18px; }
+.acc { font-family: var(--mono); font-size: .74rem !important; letter-spacing: .06em; }
+.acc span { color: var(--muted); }
+.acc span.on { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.acc:hover { text-decoration: none; }
 .note { font-size: .8rem; color: var(--muted); margin: 0; }
 .note.warn { color: var(--bad); }
 .conn { display: inline-flex; align-items: center; gap: 7px; margin: 0; font-size: .8rem; font-weight: 500; justify-self: start; }
@@ -164,11 +205,27 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .verdict p { margin: 0; color: var(--ink); font-size: 1.05rem; }
 .verdict small { color: var(--muted); }
 .qrow { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; }
+#quiz:not([hidden]) ~ .appver { display: none; }
+#qBody { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.opts { display: grid; gap: 8px; }
+.opt { display: flex; align-items: baseline; gap: 14px; width: 100%; min-width: 0; text-align: left; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 2px; background: var(--sheet); color: var(--ink); font-size: 1rem; line-height: 1.5; transition: border-color .15s, color .15s; }
+.opt .key { flex: none; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; color: var(--muted); }
+.opt .txt { min-width: 0; overflow-wrap: anywhere; }
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt:disabled { cursor: default; }
+.opt:disabled:not(.right):not(.wrong) { opacity: .4; }
+.opt.right { border-color: var(--good); color: var(--good); }
+.opt.right .key, .opt.wrong .key { color: inherit; }
+.opt.wrong { border-color: var(--bad); color: var(--bad); }
 .score { font-family: var(--serif); font-size: 4.5rem; font-weight: 400; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .score small { font-family: var(--mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-left: 10px; vertical-align: middle; }
 .miss { display: grid; gap: 0; border-top: 1px solid var(--rule); padding-top: 14px; }
 .miss div { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; padding: 5px 0; color: var(--ink-2); }
 .miss .say { font-size: 1.15rem; font-weight: 400; }
+.sndbtn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--rule); border-radius: 2px; background: none; color: var(--ink); }
+.sndbtn svg { width: 17px; height: 17px; }
+.sndbtn[aria-pressed="false"] { color: var(--muted); }
+.sndbtn:hover { border-color: var(--ink); }
 .check { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); }
 .check input { accent-color: var(--ink); }
 
@@ -197,6 +254,9 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .score { font-size: 3.6rem; }
   .frow { grid-template-columns: minmax(0, 1fr) auto; }
   .frow .meta { grid-column: 1 / -1; grid-row: 2; }
+  .azrow { grid-template-columns: minmax(0, 1fr) auto; }
+  .azrow .zh2 { grid-column: 1 / -1; }
+  .stage .card { padding: 24px 18px 20px; min-height: 260px; }
   .seg { gap: 12px; }
   .tools { gap: 10px 18px; }
 }
@@ -215,7 +275,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
     <div class="qtop">
       <div class="qprog" id="qProg"></div>
       <div class="qrow">
-        <label class="check"><input type="checkbox" id="autoSay"> 出題時自動唸</label>
+        <button class="sndbtn" id="autoSay" type="button" aria-pressed="true" aria-label="出題時播放聲音" title="出題時播放聲音"></button>
         <button class="ghost" id="qExit" type="button">結束測驗</button>
       </div>
     </div>
@@ -224,22 +284,20 @@ html, body { max-width: 100%; overflow-x: hidden; }
 
   <div class="bar">
     <form class="add" id="addForm" autocomplete="off">
-      <input id="newWord" placeholder="輸入不會的英文單字，例如 decide" aria-label="新增單字" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
+      <input id="newWord" placeholder="輸入英文單字，或用中文搜尋" aria-label="新增單字" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
       <button class="btn" id="addBtn" type="submit">加入</button>
     </form>
     <div class="suggest" id="suggest" role="listbox" aria-label="建議的單字" hidden></div>
     <div class="tools">
-      <input id="search" type="search" placeholder="搜尋單字或中文…" aria-label="搜尋">
       <div class="seg" role="group" aria-label="篩選">
         <button type="button" data-f="all" aria-pressed="true">全部</button>
         <button type="button" data-f="learning" aria-pressed="false">學習中</button>
         <button type="button" data-f="mastered" aria-pressed="false">已熟記</button>
       </div>
-      <div class="seg" role="group" aria-label="口音">
-        <button type="button" data-acc="en-US" aria-pressed="true">美音</button>
-        <button type="button" data-acc="en-GB" aria-pressed="false">英音</button>
+      <div class="toolr">
+        <button class="ghost acc" id="accentBtn" type="button" title="切換美式／英式發音" aria-label="發音口音"><span data-acc="en-US">US</span> / <span data-acc="en-GB">UK</span></button>
+        <button class="ghost" id="syncBtn" type="button" aria-expanded="false" aria-controls="syncPanel">同步</button>
       </div>
-      <button class="ghost" id="syncBtn" type="button" aria-expanded="false" aria-controls="syncPanel">同步</button>
     </div>
     <section class="sync" id="syncPanel" hidden>
       <div class="syncstep">
@@ -259,6 +317,17 @@ html, body { max-width: 100%; overflow-x: hidden; }
   </div>
 
   <p class="appver" id="appver" hidden></p>
+  <div class="views" id="views" hidden>
+    <div class="seg" role="group" aria-label="檢視方式">
+      <button type="button" data-view="cards" aria-pressed="true">Cards</button>
+      <button type="button" data-view="az" aria-pressed="false">A–Z</button>
+    </div>
+    <div class="deckctl" id="deckctl">
+      <button type="button" id="prevCard" aria-label="上一張">←</button>
+      <span id="deckCount"></span>
+      <button type="button" id="nextCard" aria-label="下一張">→</button>
+    </div>
+  </div>
   <div class="list" id="list">
     <div class="empty"><b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。</div>
   </div>
@@ -267,7 +336,9 @@ html, body { max-width: 100%; overflow-x: hidden; }
 <script>
 const $ = s => document.querySelector(s);
 const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
-const state = { words: [], filter: "all", q: "", accent: "en-US", pending: new Set(), confirmDel: null, errors: {} };
+const state = { words: [], filter: "all", q: "", accent: "en-US", pending: new Set(), confirmDel: null, errors: {},
+  view: "cards", idx: 0, focusId: null, enterDir: 0 };
+try { const v = localStorage.getItem("view"); if (v === "cards" || v === "az") state.view = v; } catch {}
 let db = null, sample = null, localMode = false;
 // 離線版（GitHub Pages 上的 App）在 <head> 放了這個 meta，不使用 Claude 與雲端資料庫
 const OFFLINE = !!document.querySelector('meta[name="wordbook-offline"]');
@@ -395,10 +466,12 @@ async function importData(text) {
 }
 /* ---------- 內建字典（大考中心詞彙表 + 同字族），查得到就不用問 Claude ---------- */
 let dict = null;
-const dictReady = fetch("dict.json").then(r => r.ok ? r.json() : null).then(d => { dict = d; return d; }).catch(() => null);
+const DICT_VERSION = 4;  // 字典內容有變就加 1，避免瀏覽器拿到暫存的舊字典
+const dictReady = fetch("dict.json?v=" + DICT_VERSION).then(r => r.ok ? r.json() : null).then(d => { dict = d; return d; }).catch(() => null);
 function fromDict(word) {
   if (!dict) return null;
-  let lemma = dict.words[word] ? word : dict.inf[word];
+  // received 這類本身也是詞條的變化形，優先改用原形 receive
+  let lemma = (dict.base && dict.base[word]) || (dict.words[word] ? word : dict.inf[word]);
   if (!lemma && word.includes(" ")) {  // gave up → give up
     const [first, ...rest] = word.split(/\s+/), base = dict.inf[first] && [dict.inf[first], ...rest].join(" ");
     if (base && dict.words[base]) lemma = base;
@@ -421,6 +494,7 @@ async function addWord(raw) {
   const id = idOf(word);
   const exists = state.words.find(w => w.id === id);
   if (exists) { setStatus(`「${exists.display || exists.word}」已經在單字庫裡了。${note}`); jumpTo(id); return; }
+  state.focusId = id;  // 加入後卡片直接翻到這個字
   if (hit) {
     await save(id, { word, createdAt: Date.now(), mastered: false, ...hit.data }, true);
     setStatus(`已加入「${word}」${note}，資料來自內建字典。`);
@@ -437,9 +511,9 @@ async function addWord(raw) {
   lookup(id, word);
 }
 function jumpTo(id) {
-  state.q = ""; $("#search").value = ""; state.filter = "all"; syncSeg(); render();
-  const el = document.getElementById("w-" + id);
-  if (el) { el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" }); }
+  state.q = ""; state.filter = "all"; state.view = "cards"; state.focusId = id; syncSeg(); render();
+  const el = document.getElementById("views");
+  if (el) { el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
 }
 
 /* ---------- 畫面 ---------- */
@@ -448,6 +522,7 @@ function posClass(p) { p = (p || "").toLowerCase(); return p.startsWith("n") ? "
 function el(tag, props = {}, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;  // 沒給值的屬性（例如 disabled: null）不要設
     if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v;
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
   }
@@ -529,29 +604,150 @@ function render() {
   $("#quizBtn").hidden = !pool.length || quiz.active;
   $("#quizBtn").textContent = `Quiz (${pool.length})`;
   list.replaceChildren();
+  $("#views").hidden = !state.words.length || quiz.active;
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+  $("#deckctl").hidden = state.view !== "cards" || !shown.length;
+  list.className = "list " + (state.view === "cards" ? "deckmode" : "azmode");
   if (!state.words.length) {
     list.append(el("div", { class: "empty", html: "<b>單字庫還是空的</b>在上方輸入一個不會的單字，按「加入」。內建字典約 4 萬字（大考、多益、托福、雅思等考試詞彙與常用動詞片語），會直接帶出中文意思、音標和同字族單字，查不到的字才請 Claude 查詢。點任何一個英文字就能聽發音。" }));
   } else if (!shown.length) {
-    list.append(el("div", { class: "empty" }, "沒有符合條件的單字。"));
-  } else shown.forEach(w => list.append(card(w)));
+    list.append(el("div", { class: "empty" }, state.q ? `單字庫裡沒有「${state.q}」，按「加入」就能新增。` : "沒有符合條件的單字。"));
+  } else if (state.view === "cards") renderDeck(list, shown);
+  else renderAZ(list, shown);
 }
+
+/* ---------- 卡片：一次一張，往左滑下一張、往右滑上一張 ---------- */
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+let deckSize = 0;
+function renderDeck(list, shown) {
+  if (state.focusId) { const i = shown.findIndex(w => w.id === state.focusId); if (i >= 0) state.idx = i; state.focusId = null; }
+  deckSize = shown.length;
+  state.idx = Math.max(0, Math.min(state.idx, shown.length - 1));
+  $("#deckCount").textContent = `${String(state.idx + 1).padStart(2, "0")} / ${String(shown.length).padStart(2, "0")}`;
+  $("#prevCard").disabled = $("#nextCard").disabled = shown.length < 2;
+  const c = card(shown[state.idx]);
+  const stage = el("div", { class: "stage" + (shown.length > 1 ? " stacked" : "") }, c);
+  list.append(stage);
+  if (state.enterDir && !reduceMotion()) {
+    const d = state.enterDir;
+    c.style.transform = `translateX(${d * 28}%)`; c.style.opacity = "0";
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      c.style.transition = "transform .22s cubic-bezier(.2,.7,.3,1), opacity .22s"; c.style.transform = ""; c.style.opacity = "";
+    }));
+  }
+  state.enterDir = 0;
+  attachSwipe(stage, c);
+}
+function go(dir) {
+  const c = document.querySelector(".stage .card");
+  // 循環：最後一張往後回到第一張，第一張往前跳到最後一張
+  const next = deckSize ? (state.idx + dir + deckSize) % deckSize : 0;
+  if (!c || deckSize < 2) {  // 只有一張：輕輕彈一下
+    if (c && !reduceMotion()) {
+      c.style.transition = "transform .12s"; c.style.transform = `translateX(${-dir * 14}px)`;
+      setTimeout(() => { c.style.transform = ""; }, 120);
+    }
+    return;
+  }
+  state.confirmDel = null; state.editing = null;
+  if (reduceMotion()) { state.idx = next; render(); return; }
+  c.style.transition = "transform .18s ease-in, opacity .18s"; c.style.transform = `translateX(${-dir * 110}%) rotate(${-dir * 4}deg)`; c.style.opacity = "0";
+  setTimeout(() => { state.idx = next; state.enterDir = dir; render(); }, 170);
+}
+function attachSwipe(stage, c) {
+  let d = null;
+  stage.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.target.closest("input, textarea")) return;
+    d = { x: e.clientX, y: e.clientY, dx: 0, active: false, id: e.pointerId };
+  });
+  stage.addEventListener("pointermove", e => {
+    if (!d) return;
+    d.dx = e.clientX - d.x; const dy = e.clientY - d.y;
+    if (!d.active) {
+      if (Math.abs(d.dx) > 10 && Math.abs(d.dx) > Math.abs(dy) * 1.3) { d.active = true; stage.classList.add("dragging"); try { stage.setPointerCapture(d.id); } catch {} }
+      else if (Math.abs(dy) > 12) { d = null; return; }
+    }
+    if (d.active) { c.style.transition = "none"; c.style.transform = `translateX(${d.dx}px) rotate(${d.dx / 40}deg)`; }
+  });
+  const end = () => {
+    if (!d) return;
+    const { active, dx } = d; d = null; stage.classList.remove("dragging");
+    if (!active) return;
+    // 剛拖完不要觸發卡片上的按鈕
+    const block = ev => { ev.stopPropagation(); ev.preventDefault(); };
+    stage.addEventListener("click", block, true);
+    setTimeout(() => stage.removeEventListener("click", block, true), 60);
+    if (dx < -70) go(1);
+    else if (dx > 70) go(-1);
+    else { c.style.transition = "transform .2s"; c.style.transform = ""; }
+  };
+  stage.addEventListener("pointerup", end);
+  stage.addEventListener("pointercancel", end);
+}
+
+/* ---------- 單字表：A–Z 分類，只列單字、詞性、中文 ---------- */
+const stripPos = zh => (zh || "").replace(/\b(n|v|vt|vi|adj|adv|prep|conj|pron|phr|int|art|aux|num)\.\s*/g, "");
+function renderAZ(list, shown) {
+  const sorted = shown.slice().sort((a, b) => (a.display || a.word).localeCompare(b.display || b.word, "en", { sensitivity: "base" }));
+  const groups = new Map();
+  for (const w of sorted) {
+    const ch = (w.display || w.word)[0].toUpperCase(), key = /[A-Z]/.test(ch) ? ch : "#";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(w);
+  }
+  const bar = el("nav", { class: "azbar", "aria-label": "字母索引" });
+  for (const L of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+    const b = el("button", { type: "button", disabled: groups.has(L) ? null : "" }, L);
+    b.addEventListener("click", () => { const g = document.getElementById("az-" + L); if (g) g.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" }); });
+    bar.append(b);
+  }
+  list.append(bar);
+  for (const [L, ws] of groups) {
+    const g = el("section", { class: "azgroup", id: "az-" + L }, el("h3", {}, L, el("small", {}, String(ws.length))));
+    for (const w of ws) {
+      const row = el("div", { class: "azrow" + (w.mastered ? " mastered" : ""), title: "點一下看這張卡片" },
+        sayBtn(w.display || w.word),
+        el("span", { class: "pos" }, (w.pos || []).join(" ")),
+        el("span", { class: "zh2" }, stripPos(w.zh) || "—"));
+      row.addEventListener("click", e => {
+        if (e.target.closest(".say")) return;
+        state.view = "cards"; state.focusId = w.id; saveView(); render();
+        $("#views").scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+      });
+      g.append(row);
+    }
+    list.append(g);
+  }
+}
+function saveView() { try { localStorage.setItem("view", state.view); } catch {} }
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { state.view = b.dataset.view; saveView(); render(); }));
+$("#prevCard").addEventListener("click", () => go(-1));
+$("#nextCard").addEventListener("click", () => go(1));
+document.addEventListener("keydown", e => {
+  if (state.view !== "cards" || quiz.active || e.target.closest("input, textarea, select")) return;
+  if (e.key === "ArrowRight") go(1);
+  else if (e.key === "ArrowLeft") go(-1);
+});
 function syncSeg() {
   document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === state.filter)));
-  document.querySelectorAll("[data-acc]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.acc === state.accent)));
+  document.querySelectorAll("#accentBtn [data-acc]").forEach(s => s.classList.toggle("on", s.dataset.acc === state.accent));
 }
 
 /* ---------- 測驗 ---------- */
 const quiz = { active: false, items: [], i: 0, results: [], phase: "ask", cur: null, autoSay: true };
 try { quiz.autoSay = localStorage.getItem("autoSay") !== "0"; } catch {}
-$("#autoSay").checked = quiz.autoSay;
+const MUTED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg>';
+function syncSound() {
+  const b = $("#autoSay"); b.innerHTML = quiz.autoSay ? SPEAKER : MUTED;
+  b.setAttribute("aria-pressed", String(quiz.autoSay));
+  b.title = quiz.autoSay ? "出題時播放聲音（點一下關閉）" : "出題時不播放聲音（點一下開啟）";
+}
+syncSound();
 const quizPool = () => state.words.filter(w => !w.mastered && w.zh);
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const norm = s => (s || "").replace(/[\s。．.!！?？~～]/g, "").replace(/[的地得]$/, "");
 function senses(zh) { return zh.split(/[；;，,、\/／()（）\[\]［］]/).map(norm).filter(Boolean); }
-function localMatch(ans, zh) {
-  const a = norm(ans); if (!a) return false;
-  return senses(zh).some(s => s === a || (a.length >= 2 && (s.includes(a) || a.includes(s))));
-}
 function startQuiz(words) {
   quiz.items = shuffle(words.map(w => w.id)); quiz.i = 0; quiz.results = []; quiz.active = true;
   speechSynthesis && speechSynthesis.cancel && speechSynthesis.cancel();
@@ -563,21 +759,50 @@ function exitQuiz() {
   quiz.active = false; $(".bar").hidden = false; $("#list").hidden = false; $("#quiz").hidden = true; render();
 }
 const wordById = id => state.words.find(w => w.id === id);
+/* 選擇題：正確答案＋3 個干擾選項（先從單字庫挑，不夠再從內建字典補，盡量同詞性） */
+const shortZh = zh => stripPos(zh).split(/[；;]/)[0].split(/[、,，]/).map(s => s.trim()).filter(Boolean).slice(0, 3).join("、");
+let dictPool = null;
+function makeOptions(w) {
+  const right = shortZh(w.zh), pos = (w.pos || [])[0] || "";
+  const rightSenses = new Set(senses(w.zh));
+  const taken = new Set([right]);
+  const ok = t => t && !taken.has(t) && !senses(t).some(s => rightSenses.has(s));
+  const pick = (cands, n) => {
+    const out = [];
+    for (const c of shuffle(cands)) { if (out.length >= n) break; if (ok(c.t)) { taken.add(c.t); out.push(c.t); } }
+    return out;
+  };
+  const mine = state.words.filter(x => x.id !== w.id && x.zh).map(x => ({ t: shortZh(x.zh), pos: (x.pos || [])[0] || "" }));
+  // 最多 2 個來自自己的單字庫，第 3 個用字典的字，避免選項總是同一批
+  const wrong = pick(mine.filter(c => c.pos === pos), 2);
+  if (wrong.length < 2) wrong.push(...pick(mine, 2 - wrong.length));
+  if (wrong.length < 3 && dict) {
+    if (!dictPool) dictPool = Object.values(dict.words).filter(e => e.lv && e.zh).map(e => ({ t: shortZh(e.zh), pos: (e.pos || [])[0] || "" }));
+    const sample = [];
+    for (let k = 0; k < 60; k++) sample.push(dictPool[Math.floor(Math.random() * dictPool.length)]);
+    wrong.push(...pick(sample.filter(c => c.pos === pos), 3 - wrong.length));
+    if (wrong.length < 3) wrong.push(...pick(sample, 3 - wrong.length));
+  }
+  if (wrong.length < 3) wrong.push(...pick(mine, 3 - wrong.length));
+  return shuffle([{ t: right, ok: true }, ...wrong.slice(0, 3).map(t => ({ t, ok: false }))]);
+}
 function askNext() {
   while (quiz.i < quiz.items.length && !wordById(quiz.items[quiz.i])) quiz.i++;
   if (quiz.i >= quiz.items.length) { quiz.phase = "end"; renderQuiz(); return; }
-  quiz.phase = "ask"; quiz.cur = { id: quiz.items[quiz.i], answer: "", correct: null, reason: "" };
+  const w = wordById(quiz.items[quiz.i]);
+  quiz.phase = "ask"; quiz.cur = { id: w.id, options: makeOptions(w), chosen: null, correct: null };
   renderQuiz();
-  const w = wordById(quiz.cur.id);
   if (quiz.autoSay) speak(w.display || w.word, document.querySelector("#qBody .say"));
-  const inp = $("#qAns"); if (inp) inp.focus();
 }
-async function check(ans, gaveUp) {
-  const w = wordById(quiz.cur.id); quiz.cur.answer = ans;
-  if (gaveUp) { quiz.cur.correct = false; quiz.phase = "result"; return renderQuiz(); }
-  // 只比對參考答案，不另外請 Claude 判斷（不用到用量）
-  quiz.cur.correct = localMatch(ans, w.zh); quiz.phase = "result"; renderQuiz();
+function choose(i) {
+  if (quiz.phase !== "ask") return;
+  quiz.cur.chosen = i; quiz.cur.correct = i >= 0 && quiz.cur.options[i].ok;
+  quiz.phase = "result"; renderQuiz();
 }
+document.addEventListener("keydown", e => {
+  if (!quiz.active || quiz.phase !== "ask" || e.target.closest("input, textarea")) return;
+  const n = Number(e.key); if (n >= 1 && n <= 4 && quiz.cur.options[n - 1]) choose(n - 1);
+});
 function next() {
   const c = quiz.cur, w = wordById(c.id);
   quiz.results.push(c);
@@ -587,7 +812,7 @@ function next() {
 function renderQuiz() {
   const total = quiz.items.length, done = quiz.phase === "end" ? total : quiz.i;
   $("#qProg").replaceChildren(
-    el("span", {}, quiz.phase === "end" ? `完成 ${total} 題` : `第 ${quiz.i + 1} / ${total} 題`),
+    el("span", {}, quiz.phase === "end" ? `${total} / ${total}` : `${quiz.i + 1} / ${total}`),
     el("span", { class: "track" }, el("i", { style: `width:${total ? done / total * 100 : 0}%` })));
   const body = $("#qBody"); body.replaceChildren();
   if (quiz.phase === "end") {
@@ -613,45 +838,56 @@ function renderQuiz() {
     sayBtn(w.display || w.word),
     el("div", { class: "qrow" }, w.phonetic ? el("span", { class: "ipa" }, w.phonetic) : null,
       (w.pos || []).map(p => el("span", { class: "chip " + posClass(p) }, p)))));
-  if (quiz.phase === "ask") {
-    const form = el("form", { class: "qform", autocomplete: "off" },
-      el("input", { id: "qAns", placeholder: "輸入中文意思", "aria-label": "中文意思" }),
-      el("button", { class: "btn", type: "submit" }, "對答案"),
-      el("button", { class: "ghost", type: "button", onclick: () => check("", true) }, "不知道"));
-    form.addEventListener("submit", e => { e.preventDefault(); const v = $("#qAns").value.trim(); if (v) check(v); else $("#qAns").focus(); });
-    body.append(form);
+  const c = quiz.cur, done1 = quiz.phase === "result";
+  const opts = el("div", { class: "opts", role: "group", "aria-label": "選擇中文意思" });
+  c.options.forEach((o, i) => {
+    const cls = "opt" + (done1 && o.ok ? " right" : "") + (done1 && i === c.chosen && !o.ok ? " wrong" : "");
+    const b = el("button", { class: cls, type: "button", disabled: done1 ? "" : null, onclick: () => choose(i) },
+      el("span", { class: "key" }, "ABCD"[i]), el("span", { class: "txt" }, o.t));
+    opts.append(b);
+  });
+  body.append(opts);
+  if (!done1) {
+    body.append(el("div", { class: "qrow" }, el("button", { class: "ghost", type: "button", onclick: () => choose(-1) }, "看答案")));
     return;
   }
-  const c = quiz.cur;
   body.append(el("div", { class: "verdict " + (c.correct ? "ok" : "no") },
-    el("b", {}, c.correct ? "答對了 ✓" : (c.answer ? "答錯了 ✗" : "沒關係，記下來")),
-    c.answer ? el("small", {}, "你的答案：" + c.answer) : null,
-    el("p", {}, "參考答案：" + w.zh),
-    c.reason ? el("small", {}, c.reason) : null));
-  if (w.example) body.append(el("p", { class: "ex", style: "margin-top:12px" }, w.example, w.example_zh ? el("span", {}, w.example_zh) : null));
+    el("b", {}, c.correct ? "答對了" : (c.chosen >= 0 ? "答錯了" : "記下來")),
+    stripPos(w.zh) !== shortZh(w.zh) ? el("p", {}, "完整意思：" + w.zh) : null));
+  if (w.example) body.append(el("p", { class: "ex" }, w.example, w.example_zh ? el("span", {}, w.example_zh) : null));
   const nextBtn = el("button", { class: "btn small", type: "button", id: "qNext", onclick: next }, quiz.i + 1 < total ? "下一題" : "看成績");
-  const row = el("div", { class: "qrow", style: "margin-top:16px" }, nextBtn);
-  if (!c.correct && c.answer) row.append(el("button", { class: "ghost", type: "button", onclick: () => { c.correct = true; c.reason = "你手動改判為答對。"; renderQuiz(); } }, "其實我答對了"));
+  const row = el("div", { class: "qrow" }, nextBtn);
   row.append(el("button", { class: "ghost", type: "button", onclick: () => { save(c.id, { mastered: true }); next(); } }, "標為已熟記，下一題"));
   body.append(row);
   nextBtn.focus();
 }
 $("#quizBtn").addEventListener("click", () => startQuiz(quizPool()));
 $("#qExit").addEventListener("click", exitQuiz);
-$("#autoSay").addEventListener("change", e => { quiz.autoSay = e.target.checked; try { localStorage.setItem("autoSay", quiz.autoSay ? "1" : "0"); } catch {} });
+$("#autoSay").addEventListener("click", () => {
+  quiz.autoSay = !quiz.autoSay; syncSound();
+  try { localStorage.setItem("autoSay", quiz.autoSay ? "1" : "0"); } catch {}
+});
 
 /* ---------- 事件 ---------- */
 $("#addForm").addEventListener("submit", e => {
   e.preventDefault(); const v = $("#newWord").value; if (!v.trim()) return;
-  $("#newWord").value = ""; addWord(v);
+  if (HAN.test(v)) {  // 打中文是搜尋，不是新增
+    const first = $("#suggest").firstElementChild;
+    if (first) first.click(); else setStatus(`內建字典裡找不到「${v.trim()}」對應的英文單字。`, true);
+    return;
+  }
+  $("#newWord").value = ""; state.q = ""; addWord(v);
 });
-$("#search").addEventListener("input", e => { state.q = e.target.value; render(); });
+// 輸入框同時是搜尋框：打字時下面的單字跟著篩選
+$("#newWord").addEventListener("input", e => { state.q = e.target.value.trim(); state.idx = 0; render(); });
 // 輸入時在下方提示內建字典裡的字（只列開頭相符的前 8 個）
 let sugIndex = -1;
+const HAN = /[㐀-鿿]/;
 function hideSuggest() { const box = $("#suggest"); box.hidden = true; box.replaceChildren(); sugIndex = -1; $("#newWord").setAttribute("aria-expanded", "false"); }
-function pickSuggest(k) { hideSuggest(); $("#newWord").value = ""; addWord(k); }
+function pickSuggest(k) { hideSuggest(); $("#newWord").value = ""; state.q = ""; addWord(k); }
 function markSuggest() { [...$("#suggest").children].forEach((b, i) => b.setAttribute("aria-selected", String(i === sugIndex))); }
 $("#newWord").addEventListener("keydown", e => {
+  if (e.isComposing || e.keyCode === 229) { if (e.key === "Enter") e.preventDefault(); return; }  // 注音／拼音選字中的 Enter 不送出
   const items = $("#suggest").children;
   if ($("#suggest").hidden || !items.length) return;
   if (e.key === "ArrowDown") { e.preventDefault(); sugIndex = (sugIndex + 1) % items.length; markSuggest(); }
@@ -662,14 +898,16 @@ $("#newWord").addEventListener("keydown", e => {
 $("#newWord").addEventListener("blur", () => setTimeout(hideSuggest, 150));
 $("#addForm").addEventListener("submit", hideSuggest);
 $("#newWord").addEventListener("input", e => {
-  const q = e.target.value.trim().toLowerCase(), box = $("#suggest");
-  if (!dict || q.length < 2) { hideSuggest(); return; }
-  // 大考詞彙優先，再補其他字
+  const q = e.target.value.trim().toLowerCase(), box = $("#suggest"), han = HAN.test(q);
+  if (!dict || (!han && q.length < 2)) { hideSuggest(); return; }
+  // 英文：開頭相符；中文：意思裡有這幾個字（例如打「放棄」找到 abandon）。大考詞彙優先
+  const match = han ? (k => dict.words[k].zh.includes(q)) : (k => k.startsWith(q));
   const hits = [], more = [];
   for (const k in dict.words) {
-    if (!k.startsWith(q)) continue;
+    if (!match(k)) continue;
     if (dict.words[k].lv) { hits.push(k); if (hits.length >= 8) break; } else if (more.length < 8) more.push(k);
   }
+  if (han) hits.sort((a, b) => dict.words[a].zh.indexOf(q) - dict.words[b].zh.indexOf(q));
   hits.push(...more.slice(0, 8 - hits.length));
   sugIndex = -1;
   if (!hits.length) { hideSuggest(); return; }
@@ -682,9 +920,9 @@ $("#newWord").addEventListener("input", e => {
   box.hidden = false; e.target.setAttribute("aria-expanded", "true");
 });
 document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.f; syncSeg(); render(); }));
-document.querySelectorAll("[data-acc]").forEach(b => b.addEventListener("click", () => {
-  state.accent = b.dataset.acc; syncSeg(); try { localStorage.setItem("accent", state.accent); } catch {}
-}));
+$("#accentBtn").addEventListener("click", () => {
+  state.accent = state.accent === "en-US" ? "en-GB" : "en-US"; syncSeg(); try { localStorage.setItem("accent", state.accent); } catch {}
+});
 syncSeg();
 
 $("#syncBtn").addEventListener("click", () => {

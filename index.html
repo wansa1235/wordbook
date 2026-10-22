@@ -88,6 +88,13 @@ button { font: inherit; cursor: pointer; }
 .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .headword { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; min-width: 0; }
 .say { background: none; border: 0; padding: 0; color: var(--fg); font-family: var(--display); font-size: 1.9rem; font-weight: 600; line-height: 1.15; text-align: left; display: inline-flex; align-items: center; gap: 8px; border-radius: 6px; }
+.say { max-width: 100%; overflow-wrap: anywhere; }
+.headword > *, .head > *, .frow > * { min-width: 0; max-width: 100%; }
+.zh, .note, .meta, .ex { overflow-wrap: anywhere; }
+/* iPhone 在輸入框字小於 16px 時會自動放大頁面，之後就得左右滑動 */
+input, textarea, select { font-size: max(16px, 1em) !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: clip; }
 .say:hover { color: var(--accent); }
 .say:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .say svg { width: .55em; height: .55em; color: var(--muted); flex: none; }

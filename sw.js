@@ -1,5 +1,5 @@
 // 離線快取：第一次打開時把整個 App 存在手機上，之後沒網路也能開
-const CACHE = "wordbook-202610221828";
+const CACHE = "wordbook-202610221840";
 const FILES = ["./", "index.html", "dict.json", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

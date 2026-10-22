@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="wordbook-offline" content="1">
-<meta name="wordbook-version" content="202610221929">
+<meta name="wordbook-version" content="202610222259">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vocabulary">
@@ -81,6 +81,13 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .add input { flex: 1; min-width: 0; font: 400 1.35rem var(--serif); padding: 10px 2px; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; background: transparent; color: var(--ink); transition: border-color .15s; }
 .add input::placeholder { font-family: var(--sans); font-size: 1rem; color: var(--muted); }
 .add input:focus { outline: none; border-bottom-color: var(--ink); }
+/* 建議字：放在輸入框下方、跟著版面往下推，不蓋住正在打的字 */
+.suggest { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: -8px; border-bottom: 1px solid var(--rule); }
+.suggest button { display: flex; align-items: baseline; gap: 14px; width: 100%; min-width: 0; text-align: left; background: none; border: 0; padding: 8px 2px; color: var(--ink); }
+.suggest button + button { border-top: 1px dotted var(--rule); }
+.suggest b { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; flex: none; }
+.suggest span { color: var(--muted); font-size: .82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest button:hover, .suggest button[aria-selected="true"] { background: var(--sheet); }
 .tools { display: flex; gap: 10px 22px; flex-wrap: wrap; align-items: center; }
 .tools input { flex: 1; min-width: 140px; font: inherit; padding: 6px 2px; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; background: transparent; color: var(--ink); }
 .tools input:focus { outline: none; border-bottom-color: var(--ink); }
@@ -217,10 +224,10 @@ html, body { max-width: 100%; overflow-x: hidden; }
 
   <div class="bar">
     <form class="add" id="addForm" autocomplete="off">
-      <input id="newWord" placeholder="輸入不會的英文單字，例如 decide" aria-label="新增單字" spellcheck="false" autocapitalize="off" list="dictWords">
-      <datalist id="dictWords"></datalist>
+      <input id="newWord" placeholder="輸入不會的英文單字，例如 decide" aria-label="新增單字" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
       <button class="btn" id="addBtn" type="submit">加入</button>
     </form>
+    <div class="suggest" id="suggest" role="listbox" aria-label="建議的單字" hidden></div>
     <div class="tools">
       <input id="search" type="search" placeholder="搜尋單字或中文…" aria-label="搜尋">
       <div class="seg" role="group" aria-label="篩選">
@@ -639,10 +646,24 @@ $("#addForm").addEventListener("submit", e => {
   $("#newWord").value = ""; addWord(v);
 });
 $("#search").addEventListener("input", e => { state.q = e.target.value; render(); });
-// 輸入時提示內建字典裡的字（只列開頭相符的前 8 個）
+// 輸入時在下方提示內建字典裡的字（只列開頭相符的前 8 個）
+let sugIndex = -1;
+function hideSuggest() { const box = $("#suggest"); box.hidden = true; box.replaceChildren(); sugIndex = -1; $("#newWord").setAttribute("aria-expanded", "false"); }
+function pickSuggest(k) { hideSuggest(); $("#newWord").value = ""; addWord(k); }
+function markSuggest() { [...$("#suggest").children].forEach((b, i) => b.setAttribute("aria-selected", String(i === sugIndex))); }
+$("#newWord").addEventListener("keydown", e => {
+  const items = $("#suggest").children;
+  if ($("#suggest").hidden || !items.length) return;
+  if (e.key === "ArrowDown") { e.preventDefault(); sugIndex = (sugIndex + 1) % items.length; markSuggest(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); sugIndex = (sugIndex - 1 + items.length) % items.length; markSuggest(); }
+  else if (e.key === "Escape") hideSuggest();
+  else if (e.key === "Enter" && sugIndex >= 0) { e.preventDefault(); items[sugIndex].click(); }
+});
+$("#newWord").addEventListener("blur", () => setTimeout(hideSuggest, 150));
+$("#addForm").addEventListener("submit", hideSuggest);
 $("#newWord").addEventListener("input", e => {
-  const q = e.target.value.trim().toLowerCase(), dl = $("#dictWords");
-  if (!dict || q.length < 2) { dl.replaceChildren(); return; }
+  const q = e.target.value.trim().toLowerCase(), box = $("#suggest");
+  if (!dict || q.length < 2) { hideSuggest(); return; }
   // 大考詞彙優先，再補其他字
   const hits = [], more = [];
   for (const k in dict.words) {
@@ -650,7 +671,15 @@ $("#newWord").addEventListener("input", e => {
     if (dict.words[k].lv) { hits.push(k); if (hits.length >= 8) break; } else if (more.length < 8) more.push(k);
   }
   hits.push(...more.slice(0, 8 - hits.length));
-  dl.replaceChildren(...hits.map(k => el("option", { value: k }, dict.words[k].zh.slice(0, 20))));
+  sugIndex = -1;
+  if (!hits.length) { hideSuggest(); return; }
+  box.replaceChildren(...hits.map(k => {
+    const b = el("button", { type: "button", role: "option", "aria-selected": "false" }, el("b", {}, k), el("span", {}, dict.words[k].zh));
+    b.addEventListener("pointerdown", ev => ev.preventDefault());  // 點選時不讓輸入框失去焦點
+    b.addEventListener("click", () => pickSuggest(k));
+    return b;
+  }));
+  box.hidden = false; e.target.setAttribute("aria-expanded", "true");
 });
 document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.f; syncSeg(); render(); }));
 document.querySelectorAll("[data-acc]").forEach(b => b.addEventListener("click", () => {
